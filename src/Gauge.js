@@ -1,39 +1,57 @@
+import { Point } from './point.js';
+import { radion, data, degree, colors } from './util.js';
 
-export default class Gauge{
-    template () {
-        const gaugeCanvas = document.createElement('canvas');
-        gaugeCanvas.className = "gaugeCanvas";
+export class Gauge {
+    constructor (color, percent) {
+        this.color  =   color;
+        this.percent    =   percent;
 
-        gaugeCanvas.width = 600;
-        gaugeCanvas.height = 500;
-
-        document.querySelector('.gauge').appendChild(gaugeCanvas);
-
-        this.draw();
+        this.resize();
     }
 
-    draw () {
-        const ctx = document.querySelector('.gaugeCanvas').getContext('2d');
+    resize (stageWidth, stageHeight) {
+        //나중에 다시 정리
+        this.stageWidth     =   stageWidth;
+        this.stageHeight    =   stageHeight;
 
-        //ctx.arc(x, y, 반지름, 시작점, 끝점, 방향 설정)
-        // * 방향 설정 - false : (기본 값) 시계방향, true : 반시계 방향
+        this.x = Math.floor(this.stageWidth);
+        this.y = Math.floor(this.stageHeight/1.3);
+
+        this.init();
+    }
+
+    init () {
+        this.point  =   new Point(this.x, this.y);
+    }
+
+    draw (ctx) {
         ctx.beginPath();
-        ctx.arc(300, 200, 150, radion(135), radion(405), false);
-        ctx.lineWidth = 50;
 
+        //const percent = data();
+
+        // ctx.arc(this.x/2, this.y/2, this.y/4, radion(135), radion(405), false);
+        ctx.arc(this.x/2, this.y/2, this.y/4, radion(135), radion(135)+radion(degree(this.percent)), false);
+        ctx.lineWidth = this.y/8;
+
+        //ctx.strokeStyle = colors[parseInt(percent/10)];
+        ctx.strokeStyle = this.color;
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(this.x/2, this.y/2, this.y/4, radion(135)+radion(degree(this.percent)), radion(405), false);
+        ctx.lineWidth = this.y/8;
         ctx.strokeStyle = '#eee';
         ctx.stroke();
 
-        ctx.font = "30px Arial";
-        ctx.fillText('시험', 250, 250);
-        ctx.fillText('PERCENT', 190, 320);
+        ctx.beginPath();
+        //font 위치 맞춰야 함.
+        ctx.font = `bold ${this.y/8}px Arial`;
+        ctx.fillText(this.percent, this.x/2 - 30, this.y/2 + 80);
+
+        ctx.font = `bold ${this.y/12}px Arial`;
+        ctx.fillText('percent', this.x/2 - 50, this.y/1.2);
+
+        this.point.update();
     }
 
-    animate (data) {
-
-    }
-}
-
-const radion = function (degree) {
-    return degree * Math.PI/180 ;
-}
+}   
