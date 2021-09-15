@@ -1,24 +1,30 @@
-import { data, radion, _ON, _OFF } from './util.js';
+import { mousePos, data, radion, ON, OFF, DEFAULT } from './util.js';
 import { Gauge } from './gauge.js';
 
-const toggleEvent = function () {
-    const $btn = document.querySelector('.btn');
+const toggleEvent = function (e) {
+    if (this.active === OFF || this.active === DEFAULT) {
+        this.active = ON;
+        e.target.textContent = "STOP";
 
-    if ($btn.value === _OFF ) {
-        $btn.textContent = "STOP";
-        this.active = _ON;
-
-        //ctx.clearRect(0, 0, document.body.clientWidth, document.body.clientHeight);
-        // this.gauge.animate(this.ctx);
-        // dataInterval = setInterval(function(){   //나중에 data로 바꿀것
-        //     console.log(data());
-        // }, 1000);   //나중에 5000으로 바꿀것
-    }else {
-        $btn.textContent = "START";
-        $btn.active = _OFF;
-        // clearInterval(dataInterval);
+    } else {
+        e.target.textContent = "START";
+        this.active = OFF;        
     }
-
+    this.render();    
 }
 
-export { toggleEvent } ;
+const pointerEvent = function (e) {
+    mousePos.x  =   e.layerX;
+    mousePos.y  =   e.layerY;
+    console.log(mousePos.x);
+    console.log(`중심 = ${this.x/2}`)
+
+    //this.x/2 this.y/2 <= arc의 중심점
+    console.log(`####${mousePos.x === this.x/2}`)
+    if(mousePos.x === this.x/2){
+        this.pre = 50.0;
+    }
+    this.moveGauge();
+}
+
+export { toggleEvent, pointerEvent } ;

@@ -1,5 +1,7 @@
-const _ON = "1";
-const _OFF = "0";
+const DEFAULT  =   "0";
+const ON   =   "1";
+const OFF  =   "2";
+const mousePos = {x: 0, y: 0};
 
 const radion = function (degree) {
     return degree * Math.PI/180 ;
@@ -10,15 +12,12 @@ const degree = function (data) {
 }
 
 const data = function () {
-    return (Math.round((Math.random() * 1001))/10).toFixed(1);
+    return parseFloat(((Math.floor(Math.random() * 1001))/10).toFixed(1));
 }
 
 const colors = [
-    "rgb(163, 254, 0)", "rgb(186, 249, 72)",
-    "rgb(255, 87, 51)", "rgb(201, 244, 124)",
-    "rgb(218, 247, 166)", "rgb(255, 195, 0)",
-    "rgb(255, 87, 51)", "rgb(199, 0, 57)",
-    "rgb(144, 12, 63)", "rgb(88, 24, 69)",
+    "#4b45ab", "#554fb8", "#605ac7", "#2a91a8", "#2e9ab2",
+    "#32a5bf", "#81b144", "#85b944", "#8fc549", "#e0af27"
 ]
 
-export { radion, data, colors, _ON, _OFF, degree };
+export { mousePos, radion, data, colors, ON, OFF, DEFAULT, degree };

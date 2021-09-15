@@ -1,6 +1,6 @@
 import { Gauge } from "./gauge.js";
-import { _OFF, _ON, radion, colors, data, degree } from './util.js';
-import { toggleEvent } from './event.js';
+import { OFF, ON, DEFAULT, radion, colors, data, degree } from './util.js';
+import { toggleEvent, pointerEvent } from './event.js';
 
 class App {
     constructor () {
@@ -8,10 +8,9 @@ class App {
         this.ctx    =   this.canvas.getContext('2d');
         document.body.appendChild(this.canvas);
 
-        this.btn = document.createElement('button');
-        this.btn.className = "btn";
-        this.btn.textContent = "START";
-        this.active = _OFF;
+        this.btn    =  document.createElement('button');
+        this.btn.className  =   "btn";
+        this.btn.textContent    =  "START";
         document.body.appendChild(this.btn);
 
         //https://sculove.github.io/post/addEventListener-passive/
@@ -20,12 +19,10 @@ class App {
             passive :   false,
             capture :   false,
         });
-
-        this.gauge = new Gauge('#eee', 0.0);
-
+        
+        this.init();
         this.resize();
         this.addEvent();
-
     }
 
     resize () {
@@ -34,9 +31,9 @@ class App {
         this.stageHeight    =   document.body.clientHeight;
 
         this.canvas.width   =   Math.floor(this.stageWidth) ;
-        this.canvas.height  =   Math.floor(this.stageHeight/1.3) ;
+        this.canvas.height  =   Math.floor(this.stageHeight/1.5) ;
 
-        //크기를 2배로 늘렸으므로 각 픽셀이 2개씩 차지
+        //각 픽셀 크기 조정
         //https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/scale
         //this.ctx.scale(2, 2);
 
@@ -45,46 +42,81 @@ class App {
         this.render();
     }
 
+    init () {
+        this.active =   DEFAULT;
+        
+        this.pre    =   0.0;
+        this.cur    =   data();
+
+        this.time   =   0;
+        this.gauge  =   new Gauge();
+    }
+    
     render () {
-        this.x = this.canvas.width;
-        this.y = this.canvas.height;
+        this.x  =   this.canvas.width;
+        this.y  =   this.canvas.height;
         this.ctx.clearRect(0, 0, this.x, this.y);
-
-        const percent = data();
-
+        
         switch (this.active) {
-            case _OFF :
+            case DEFAULT :
                 this.gauge.draw(this.ctx);
                 break;
-            case _ON :
-                this.gauge = new Gauge(colors[parseInt(percent/10)], percent);
+            
+            case ON :
+                if (this.time < 300) {  //5초
+                    this.time++;
+                } else {
+                    this.cur = data();
+                    this.time = 0;
+                }
+                
+                this.gauge.color    =   colors[parseInt(this.pre/10)];
+
+                //수정 
+                if (this.pre < this.cur ) {
+                    this.pre += this.gauge.speed;
+                    if(this.pre >= this.cur ){
+                        this.pre = this.cur;
+                    }
+                } else if (this.pre > this.cur ) {
+                    this.pre -= this.gauge.speed;
+                    if(this.pre <= this.cur ){
+                        this.pre = this.cur;
+                    }
+                } 
+                
+                this.gauge.percent  =   this.pre.toFixed(1);
+                this.gauge.limit  =   this.cur;
+
+                this.gauge.draw(this.ctx);
+
+                console.log("ON:::" + this.cur);
+                break;
+            
+            case OFF :
+                this.cur    =   this.pre;
+                this.gauge.color    =   colors[parseInt(this.pre/10)];
+                this.gauge.percent  =   this.pre.toFixed(1);
                 this.gauge.draw(this.ctx);
                 break;
         }
 
-        this.rafId = requestAnimationFrame(this.render);
-        if (this.active === _OFF ){
+        this.rafId  =   requestAnimationFrame(this.render.bind(this));
+        if (this.active === OFF || this.active === DEFAULT ){
             cancelAnimationFrame(this.rafId);
         }
+    }
 
-        // this.ctx.beginPath();
-
-        // this.ctx.arc(this.x/2, this.y/2, this.y/4, radion(135), radion(405), false);
-        // this.ctx.lineWidth = this.y/8;
-    
-        // this.ctx.strokeStyle = '#eee';
-        // this.ctx.stroke();
-        
-        // //font 위치 맞춰야 함.
-        // this.ctx.font = `bold ${this.y/8}px Arial`;
-        // this.ctx.fillText('0.0', this.x/2 - 30, this.y/2 + 80);
-    
-        // this.ctx.font = `bold ${this.y/12}px Arial`;
-        // this.ctx.fillText('percent', this.x/2 - 50, this.y/1.2);
+    moveGauge () {
+        this.ctx.clearRect(0, 0, this.x, this.y);
+        this.gauge.color    =   colors[parseInt(this.pre/10)];
+        this.gauge.percent  =   this.pre.toFixed(1);
+        this.gauge.draw(this.ctx);
     }
 
     addEvent () {
         document.querySelector('.btn').addEventListener('click', toggleEvent.bind(this));
+        document.querySelector('canvas').addEventListener('pointerdown', pointerEvent.bind(this));
     }
 }
 
