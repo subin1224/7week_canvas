@@ -10,13 +10,23 @@ let data = function () {
     return (Math.round((Math.random() * 1001))/10).toFixed(1);
 }
 
+const colors = [
+    {code : "rgb(163, 254, 0)"}, {code : "rgb(186, 249, 72)"},
+    {code : "rgb(255, 87, 51)"}, {code : "rgb(201, 244, 124)"},
+    {code : "rgb(218, 247, 166)"}, {code : "rgb(255, 195, 0)"},
+    {code : "rgb(255, 87, 51)"}, {code : "rgb(199, 0, 57)"},
+    {code : "rgb(144, 12, 63)"}, {code : "rgb(88, 24, 69)"},
+]
+
+
+
 const startClick = function () {
     document.querySelector('.toggle').classList.remove('toggle');
-    this.classList.add('toggle');
+    this.classList.add('toggle');    
 
     return dataInterval = setInterval(function(){   //나중에 data로 바꿀것
-        data;
         console.log(data());
+        render(data());
     }, 1000);   //나중에 5000으로 바꿀것
 }
 
@@ -27,9 +37,25 @@ const endClick = function () {
     clearInterval(dataInterval);    //클로저 이용
 }
 
-const animate = function () {
+const render = function (data) {
     //게이지 판과 text 판
+    const animateCanvas = document.createElement('canvas');
+    animateCanvas.className = "animateCanvas";
+
+    animateCanvas.width = 600;
+    animateCanvas.height = 350;
     
+    const animateCtx = animateCanvas.getContext('2d');
+    
+    animateCtx.clearRect(0, 0, animateCanvas.width, animateCanvas.height);
+    
+    animateCtx.font = "bold 50px Arial";
+    for(let i=0; i<data; i++){
+        animateCtx.fillText(i, 270, 280);
+    }
+
+    requestAnimationFrame(render);
+
 }
 
 
