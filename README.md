@@ -45,6 +45,8 @@
 │   ├── calc.js
 │   └── util.js
 │
+├── css
+│   └── main.css
 └── index.html
 
 ```
