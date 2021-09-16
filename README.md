@@ -47,6 +47,8 @@
 │
 ├── css
 │   └── main.css
+│
+├── main.js
 └── index.html
 
 ```
