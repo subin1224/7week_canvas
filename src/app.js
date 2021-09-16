@@ -1,6 +1,6 @@
 import { Gauge } from "./gauge.js";
-import { OFF, ON, DEFAULT, radion, colors, data, degree } from './util.js';
-import { toggleEvent, pointerEvent } from './event.js';
+import { DEFAULT, ON, OFF, mousePos, data, colors } from './util.js';
+import { toggleEvent, downEvent, moveEvent, upEvent } from './event.js';
 
 class App {
     constructor () {
@@ -89,8 +89,6 @@ class App {
                 this.gauge.limit  =   this.cur;
 
                 this.gauge.draw(this.ctx);
-
-                console.log("ON:::" + this.cur);
                 break;
             
             case OFF :
@@ -107,16 +105,22 @@ class App {
         }
     }
 
+ 
     moveGauge () {
         this.ctx.clearRect(0, 0, this.x, this.y);
         this.gauge.color    =   colors[parseInt(this.pre/10)];
         this.gauge.percent  =   this.pre.toFixed(1);
         this.gauge.draw(this.ctx);
+
     }
 
     addEvent () {
         document.querySelector('.btn').addEventListener('click', toggleEvent.bind(this));
-        document.querySelector('canvas').addEventListener('pointerdown', pointerEvent.bind(this));
+
+        document.querySelector('canvas').addEventListener('mousedown', downEvent.bind(this));
+        document.querySelector('canvas').addEventListener('mousemove', moveEvent.bind(this));
+        document.querySelector('canvas').addEventListener('mouseup', upEvent.bind(this));
+        document.querySelector('canvas').addEventListener('mouseleave', upEvent.bind(this));
     }
 }
 
