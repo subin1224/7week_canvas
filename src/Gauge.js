@@ -40,7 +40,6 @@ export class Gauge {
 
         ctx.closePath();
 
-        //font 위치 맞춰야 함.
         ctx.textBaseline    =   "middle";
         ctx.textAlign   =   "center";
         

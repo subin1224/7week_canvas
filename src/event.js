@@ -20,7 +20,7 @@ const downEvent = function (e) {
     mousePos.x  =   e.layerX;
     mousePos.y  =   e.layerY;
     
-    if (!isInsideArc(this.gauge.circleX, this.gauge.circleY, mousePos.x, mousePos.y, this.gauge.radius) ) return;
+    if ( !isInsideArc(this.gauge.circleX, this.gauge.circleY, mousePos.x, mousePos.y, this.gauge.radius) ) return;
     
     down = true;
 
@@ -35,9 +35,9 @@ const moveEvent = function (e) {
     mousePos.x  =   e.layerX;
     mousePos.y  =   e.layerY;
     
-    if (!isInsideArc(this.gauge.circleX, this.gauge.circleY, mousePos.x, mousePos.y, this.gauge.radius) ) return;
+    if ( !isInsideArc(this.gauge.circleX, this.gauge.circleY, mousePos.x, mousePos.y, this.gauge.radius) ) return;
     
-    this.pre = toPercent(pointDegree(this.gauge.circleX, this.gauge.circleY, mousePos.x, mousePos.y));
+    this.pre = toPercent( pointDegree( this.gauge.circleX, this.gauge.circleY, mousePos.x, mousePos.y ) );
 
     this.moveGauge();
 }

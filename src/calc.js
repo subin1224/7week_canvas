@@ -37,7 +37,7 @@ const pointDegree = function ( circleX, circleY, mousePosX, mousePosY ) {
 }
 
 const toPercent = function (degree) {
-    return ( degree * (10/27));
+    return degree * (10/27);
 }
 
 export { radion, degree, isInsideArc, pointDegree, toPercent };
