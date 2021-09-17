@@ -1,5 +1,7 @@
-import { mousePos, data, radion, ON, OFF, DEFAULT } from './util.js';
-import { Gauge } from './gauge.js';
+import { DEFAULT, ON, OFF, mousePos, data, colors } from './util.js';
+import { radion, degree, isInsideArc, pointDegree, toPercent } from './calc.js';
+
+let down = false;
 
 const toggleEvent = function (e) {
     if (this.active === OFF || this.active === DEFAULT) {
@@ -13,18 +15,36 @@ const toggleEvent = function (e) {
     this.render();    
 }
 
-const pointerEvent = function (e) {
+const downEvent = function (e) {
+    
     mousePos.x  =   e.layerX;
     mousePos.y  =   e.layerY;
-    console.log(mousePos.x);
-    console.log(`중심 = ${this.x/2}`)
+    
+    if ( !isInsideArc(this.gauge.circleX, this.gauge.circleY, mousePos.x, mousePos.y, this.gauge.radius) ) return;
+    
+    down = true;
 
-    //this.x/2 this.y/2 <= arc의 중심점
-    console.log(`####${mousePos.x === this.x/2}`)
-    if(mousePos.x === this.x/2){
-        this.pre = 50.0;
-    }
+    this.pre = toPercent(pointDegree(this.gauge.circleX, this.gauge.circleY, mousePos.x, mousePos.y));
+
     this.moveGauge();
 }
 
-export { toggleEvent, pointerEvent } ;
+const moveEvent = function (e) {
+    if (!down) return;
+    
+    mousePos.x  =   e.layerX;
+    mousePos.y  =   e.layerY;
+    
+    if ( !isInsideArc(this.gauge.circleX, this.gauge.circleY, mousePos.x, mousePos.y, this.gauge.radius) ) return;
+    
+    this.pre = toPercent( pointDegree( this.gauge.circleX, this.gauge.circleY, mousePos.x, mousePos.y ) );
+
+    this.moveGauge();
+}
+
+const upEvent = function (e) {
+    down = false;
+}
+
+
+export { toggleEvent, downEvent, moveEvent, upEvent };

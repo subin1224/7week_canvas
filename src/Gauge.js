@@ -1,5 +1,6 @@
-import { Point } from './point.js';
-import { radion, data, degree, colors } from './util.js';
+import { DEFAULT, ON, OFF, mousePos, data, colors } from './util.js';
+import { radion, degree, isInsideArc, pointDegree } from './calc.js';
+
 
 export class Gauge {
     constructor () {
@@ -19,36 +20,33 @@ export class Gauge {
         this.x = Math.floor(this.stageWidth);
         this.y = Math.floor(this.stageHeight/1.3);
 
+        this.circleX    =   Math.round(this.x/2);
+        this.circleY    =   Math.round(this.y/2);
+        this.radius     =   this.y/3;
     }
 
     draw (ctx) {
         ctx.beginPath();
-        ctx.arc(this.x/2, this.y/2, this.y/3, radion(135), radion(135)+radion(degree(this.percent)), false);
-        ctx.lineWidth = this.y/8;
+        ctx.arc(this.circleX, this.circleY, this.radius, radion(135), radion(45), false);
+        ctx.lineWidth = this.circleY/4;
+        ctx.strokeStyle = '#eee';
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(this.circleX, this.circleY, this.radius, radion(135), radion(135)+radion(degree(this.percent)), false);
+        ctx.lineWidth = this.circleY/4;
         ctx.strokeStyle = this.color;
         ctx.stroke();
 
-        ctx.beginPath();
-        ctx.arc(this.x/2, this.y/2, this.y/3, radion(135)+radion(degree(this.percent)), radion(45), false);
-        ctx.lineWidth = this.y/8;
-        ctx.strokeStyle = '#eee';
-        ctx.stroke();
-      
-        // ctx.beginPath();
-        // ctx.arc(this.x/2, this.y/2, this.y/3, radion(0), radion(270), false);
-        // ctx.lineWidth = this.y/8;
-        // ctx.strokeStyle = '#eee';
-        // ctx.stroke();
+        ctx.closePath();
 
-        ctx.beginPath();
-        //font 위치 맞춰야 함.
-        ctx.textBaseline="middle";
-        ctx.textAlign="center";
+        ctx.textBaseline    =   "middle";
+        ctx.textAlign   =   "center";
         
-        ctx.font = `bold ${this.y/8}px Arial`;
+        ctx.font    =   `bold ${this.y/8}px Arial`;
         ctx.fillText(this.percent, this.x/2, this.y/2);
 
-        ctx.font = `bold ${this.y/12}px Arial`;
+        ctx.font    =   `bold ${this.y/12}px Arial`;
         ctx.fillText('percent', this.x/2, this.y/1.5);
 
     }
