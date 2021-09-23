@@ -7,7 +7,7 @@ const toggleEvent = function (e) {
     if (this.active === OFF || this.active === DEFAULT) {
         this.active = ON;
         e.target.textContent = "STOP";
-
+        
     } else {
         e.target.textContent = "START";
         this.active = OFF;        
@@ -21,16 +21,19 @@ const downEvent = function (e) {
     mousePos.x  =   e.layerX;
     mousePos.y  =   e.layerY;
     
-    if ( !isInsideArc(this.gauge.circleX, this.gauge.circleY, mousePos.x, mousePos.y, this.gauge.radius) ) return;
+    const x = mousePos.x - this.gauge.circleX;
+    const y = mousePos.y - this.gauge.circleY;
+
+    if ( !isInsideArc(x, y, this.gauge.radius) ) return;
     
-    this.pre = toPercent(pointDegree(this.gauge.circleX, this.gauge.circleY, mousePos.x, mousePos.y));
-    
+    this.preData = toPercent(this.gauge.circleDegree, pointDegree(x, y, this.gauge.circleDegree));
+
     this.ctx.clearRect(0, 0, this.x, this.y);
-    this.gauge.color    =   colors[parseInt(this.pre/10)];
-    this.gauge.percent  =   this.pre.toFixed(1);
+    this.gauge.color    =   colors[parseInt(this.preData/10)];
+    this.gauge.percent  =   this.preData.toFixed(1);
     this.gauge.draw(this.ctx);
     
-    this.cur = this.pre;
+    this.curData = this.preData;
     this.curTime = timestamp();
 }
 
@@ -40,17 +43,20 @@ const moveEvent = function (e) {
     // downEvent 와 중복 - 수정 => 피드백 요청
     mousePos.x  =   e.layerX;
     mousePos.y  =   e.layerY;
+
+    const x = mousePos.x - this.gauge.circleX;
+    const y = mousePos.y - this.gauge.circleY;
+
+    if ( !isInsideArc(x, y, this.gauge.radius) ) return;
     
-    if ( !isInsideArc(this.gauge.circleX, this.gauge.circleY, mousePos.x, mousePos.y, this.gauge.radius) ) return;
-    
-    this.pre = toPercent( pointDegree( this.gauge.circleX, this.gauge.circleY, mousePos.x, mousePos.y ) );
+    this.preData = toPercent(this.gauge.circleDegree, pointDegree(x, y, this.gauge.circleDegree));
 
     this.ctx.clearRect(0, 0, this.x, this.y);
-    this.gauge.color    =   colors[parseInt(this.pre/10)];
-    this.gauge.percent  =   this.pre.toFixed(1);
+    this.gauge.color    =   colors[parseInt(this.preData/10)];
+    this.gauge.percent  =   this.preData.toFixed(1);
     this.gauge.draw(this.ctx);
 
-    this.cur = this.pre;
+    this.curData = this.preData;
     this.curTime = timestamp();
 }
 
@@ -58,4 +64,25 @@ const upEvent = function (e) {
     down = false;
 }
 
-export { toggleEvent, downEvent, moveEvent, upEvent };
+const changeDegreeEvent = function (e) {
+    if ( e.target.className !== "degreeBtn" ) return;
+
+    for(const btn of document.querySelectorAll('.inputDiv button')){
+        btn.classList.remove('onDegree');
+    }
+    
+    e.target.classList.add('onDegree');
+
+    const degree = e.target.textContent;
+    this.gauge.circleDegree = degree;
+    this.render();
+}
+
+const blurEvent = function (e) {
+    if (this.active !== ON ) return;
+    document.querySelector('.btn').textContent = "START";
+    this.active = OFF; 
+    this.render();    
+}
+
+export { toggleEvent, downEvent, moveEvent, upEvent, changeDegreeEvent, blurEvent };

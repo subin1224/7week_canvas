@@ -1,11 +1,11 @@
 import { Gauge } from "./gauge.js";
 import { DEFAULT, ON, OFF, data, timestamp, colors } from './util.js';
-import { toggleEvent, downEvent, moveEvent, upEvent } from './event.js';
+import { toggleEvent, downEvent, moveEvent, upEvent, changeDegreeEvent, blurEvent } from './event.js';
 
 export default class App {
     constructor () {
-        this.canvas =   document.createElement('canvas');
-        this.ctx    =   this.canvas.getContext('2d');
+        this.canvas = document.createElement('canvas');
+        this.ctx = this.canvas.getContext('2d');
         document.body.appendChild(this.canvas);
         
         // const offCanvas  =   document.createElement('canvas');
@@ -14,10 +14,37 @@ export default class App {
         // // => worker.js - not Found 
         // worker.postMessage({ canvas: offscreen }, [ offscreen ]);
 
-        this.btn    =  document.createElement('button');
-        this.btn.className  =   "btn";
-        this.btn.textContent    =  "START";
-        document.body.appendChild(this.btn);
+        const div = document.createElement('div');
+        div.className = "inputDiv";
+        document.body.appendChild(div);
+
+        //각도 버튼
+        const degreeBtn180 = document.createElement('button');
+        degreeBtn180.className = "degreeBtn";
+        degreeBtn180.textContent = 180;
+        document.querySelector('.inputDiv').appendChild(degreeBtn180);
+
+        const degreeBtn270 = document.createElement('button');
+        degreeBtn270.className = "degreeBtn";
+        degreeBtn270.textContent = 270;
+        document.querySelector('.inputDiv').appendChild(degreeBtn270);
+
+        const degreeBtn360 = document.createElement('button');
+        degreeBtn360.className = "degreeBtn";
+        degreeBtn360.textContent = 360;
+        document.querySelector('.inputDiv').appendChild(degreeBtn360);
+
+        //애니메이션 시작 버튼
+        const btn = document.createElement('button');
+        btn.className = "btn";
+        btn.textContent = "START";
+        document.body.appendChild(btn);
+
+        this.dataInput = document.createElement('input');
+        this.dataInput.className = "dataInput";
+        this.dataInput.value = "0.0";
+        this.dataInput.readOnly = true;
+        document.body.appendChild(this.dataInput);
 
         this.init();
         this.resize();
@@ -25,13 +52,13 @@ export default class App {
     }
 
     init () {
-        this.active =   DEFAULT;
+        this.active = DEFAULT;
         
-        this.pre    =   0.0;
-        this.cur    =   data();
+        this.preData = 0.0;
+        this.curData = data();
 
-        this.lastTime   =   timestamp();
-        this.gauge  =   new Gauge();
+        this.lastTime = timestamp();
+        this.gauge = new Gauge();    //초기 값
     }
 
     resize () {
@@ -57,9 +84,10 @@ export default class App {
     }
 
     render () {
-        this.x  =   this.canvas.width;
-        this.y  =   this.canvas.height;
+        this.x = this.canvas.width;
+        this.y = this.canvas.height;
         this.ctx.clearRect(0, 0, this.x, this.y);
+        
         
         switch (this.active) {
             case DEFAULT :
@@ -67,42 +95,36 @@ export default class App {
             
             case ON :
                 this.curTime = timestamp();
-                // if (this.curTime  - this.lastTime < 5000 ) {  //5초
-                //     this.lastTime ++;
-                // } else {
-                //     this.cur = data();
-                //     this.lastTime   =   timestamp();
-                // }
                 if (this.curTime - this.lastTime >= 5000) {
-                    this.cur = data();
+                    this.curData = data();
                     this.lastTime = timestamp()
                 }
-
+                this.dataInput.value = this.curData;
                 //수정 
-                if ( this.pre < this.cur ) {
-                    this.pre += this.gauge.speed;
-                    if ( this.pre >= this.cur ) {
-                        this.pre = this.cur;
+                if ( this.preData < this.curData ) {
+                    this.preData += this.gauge.speed;
+                    if ( this.preData >= this.curData ) {
+                        this.preData = this.curData;
                     }
-                } else if ( this.pre > this.cur ) {
-                    this.pre -= this.gauge.speed;
-                    if ( this.pre <= this.cur ) {
-                        this.pre = this.cur;
+                } else if ( this.preData > this.curData ) {
+                    this.preData -= this.gauge.speed;
+                    if ( this.preData <= this.curData ) {
+                        this.preData = this.curData;
                     }
                 }
 
                 break;
             
             case OFF :
-                this.cur    =   this.pre;
+                this.curData = this.preData;
                 break;
         }
 
-        this.gauge.color    =   colors[parseInt(this.pre/10)];
-        this.gauge.percent  =   this.pre.toFixed(1);
+        this.gauge.color = colors[parseInt(this.preData/10)];
+        this.gauge.percent = this.preData.toFixed(1);
         this.gauge.draw(this.ctx);
 
-        this.rafId  =   requestAnimationFrame(this.render.bind(this));
+        this.rafId = requestAnimationFrame(this.render.bind(this));
 
         if (this.active === OFF || this.active === DEFAULT ){
             cancelAnimationFrame(this.rafId);
@@ -112,6 +134,7 @@ export default class App {
 
     addEvent () {
         window.addEventListener('resize', this.resize.bind(this));
+        window.addEventListener('blur', blurEvent.bind(this));
 
         document.querySelector('.btn').addEventListener('click', toggleEvent.bind(this));
 
@@ -119,5 +142,7 @@ export default class App {
         document.querySelector('canvas').addEventListener('mousemove', moveEvent.bind(this));
         document.querySelector('canvas').addEventListener('mouseup', upEvent.bind(this));
         document.querySelector('canvas').addEventListener('mouseleave', upEvent.bind(this));
+
+        document.querySelector('.inputDiv').addEventListener('click', changeDegreeEvent.bind(this));
     }
 }
